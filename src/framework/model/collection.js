@@ -1,13 +1,9 @@
 const priv = Symbol()
 
 module.exports = class {
-  constructor(option) {
+  constructor({ name, ...option }) {
+    this.name = name
     this[priv] = option // { name, attribute }
-  }
-
-  setCollection(client) {
-    this[priv].collection = client.db().collection(this[priv].name)
-    this.setCollection = setCollection
   }
 
   find(where) {
@@ -25,7 +21,7 @@ module.exports = class {
 
   insert(data) {
     checkData.call(this, data)
-
+    return this.collection.insertOne(data)
   }
 
   upsert(data) {
@@ -40,8 +36,4 @@ module.exports = class {
 
 function checkData(data) {
 
-}
-
-function setCollection() {
-  throw Error('collection 已设置')
 }

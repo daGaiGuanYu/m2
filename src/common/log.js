@@ -1,12 +1,10 @@
 class Logger {
   constructor(msg) {
     this.msg = msg
+    console.log.doing(msg)
   }
   success() {
     console.log.success(this.msg)
-  }
-  doing() {
-    console.log.doing(this.msg)
   }
   error(err) {
     console.log.error(this.msg)

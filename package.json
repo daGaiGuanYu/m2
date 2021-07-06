@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "fldao": "^1.1.1",
+    "fldao": "^1.1.2",
     "mongodb": "^3.6.9"
   }
 }

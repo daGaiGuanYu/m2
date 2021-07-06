@@ -1,33 +1,46 @@
 const fs = require('fs')
 const Path = require('path')
 const { MongoClient } = require('mongodb')
-const onlyOne = require('fldao/func/func/only-one')
 
-module.exports = onlyOne('model 已初始化，或正在初始化', async function(evt) {
+const appHook = require('../app-hook')
+
+module.exports = async function() {
   const log = console.log.create('初始化 model')
-  log.doing()
+  
   try {
+    const timer = new Date()
     const client = await connect()
+    console.log(`mongodb 连接用时 ${(new Date() - timer) / 1000}s`)
     await setCollection(client)
     log.success()
-    evt.emit('model-ready')
+    appHook.emitModelOK()
   } catch(err) {
     log.error(err)
   }
-})
+}
 
 function connect() {
   return new Promise( (res, rej) => {
     const log = console.log.create('建立 mongodb 连接')
-    log.doing()
   
-    const { atlasUser, atlasPassword } = process.env
-    if(!atlasUser || !atlasPassword){
-      log.error('环境变量 [atlas 账密] 未设置')
+    if(!process.env.mongo) {
+      log.error('环境变量 [mongo] 未设置')
+      return rej()
+    }
+
+    try {
+      var { user, password, host, db } = JSON.parse(process.env.mongo)
+    } catch(e) {
+      log.error(`环境变量 [mongo] 解析异常`)
+      return rej()
+    }
+
+    if(!(user && password && host && db)){
+      log.error(`环境变量 [user: ${user}; password: ${password}; host: ${host}; db: ${db}] 设置异常`)
       return rej()
     }
   
-    const uri = `mongodb+srv://${atlasUser}:${atlasPassword}@memory2.mrswz.mongodb.net/m2?retryWrites=true&w=majority`
+    const uri = `mongodb+srv://${user}:${password}@${host}/${db}?retryWrites=true&w=majority`
     const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true })
     client.connect( err => {
       if(err) {
@@ -44,8 +57,7 @@ function connect() {
 function setCollection(client) {
   return new Promise( (res, rej) => {
     const log = console.log.create('设置 collection')
-    log.doing()
-    const dir = Path.join(__dirname, '../../model/')
+    const dir = Path.join(__dirname, '../../business/model/')
     fs.readdir(dir, (err, fileList) => {
       if(err) {
         log.error(err)
@@ -53,9 +65,10 @@ function setCollection(client) {
       }
       
       for(let file of fileList) {
-        const collectionPath = dir + file
-        console.log('[model]', collectionPath)
-        require(collectionPath).setCollection(client)
+        const path = dir + file
+        console.log('[model]', path)
+        const collection = require(path)
+        collection.collection = client.db().collection(collection.name)
       }
       res()
       log.success()
