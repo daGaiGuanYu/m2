@@ -10,8 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@ppzp/http-router": "file:../http-router/ppzp-http-router-1.0.0.tgz",
-    "@ppzp/mongo": "file:../mongo/ppzp-mongo-0.0.0.tgz",
-    "mongodb": "^3.6.10"
+    "@ppzp/http-router": "0.0.0",
+    "@ppzp/mongo": "0.0.0",
+    "mongodb": "^4.0.0"
   }
 }
