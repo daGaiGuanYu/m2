@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "@ppzp/http-router": "0.0.0",
+    "@ppzp/markd": "0.0.0",
     "@ppzp/mongo": "0.0.0",
     "mongodb": "^4.0.0"
   }
